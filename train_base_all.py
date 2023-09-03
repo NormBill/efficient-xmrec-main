@@ -209,8 +209,6 @@ if __name__ == "__main__":
     else:
         models = [args.model_selection]
 
-    import pickle
-
     # 获取映射关系
     index_to_user_id_mapping = {v: k for k, v in id_bank.user_id_index.items()}
 
