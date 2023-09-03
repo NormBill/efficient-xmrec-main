@@ -118,9 +118,9 @@ if __name__ == "__main__":
         if cur_tgt_market == args.aug_src_market:
             cur_mark_fraction = args.src_fraction
 
-        cur_mkt_data_dir = os.path.join(args.data_dir, f'{cur_tgt_market}_5core.txt')
+        cur_mkt_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{cur_tgt_market}_5core.txt')
         if cur_tgt_market == 'us':
-            cur_mkt_data_dir = os.path.join(args.data_dir, f'{cur_tgt_market}_10core.txt')
+            cur_mkt_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{cur_tgt_market}_10core.txt')
         print(f'loading {cur_mkt_data_dir}')
 
         cur_mkt_ratings = pd.read_csv(cur_mkt_data_dir, sep=' ')

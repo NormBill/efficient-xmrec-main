@@ -140,7 +140,7 @@ if __name__ == "__main__":
     if args.experiment_type == "single_model":
         print("loading us data")
         # load the us market data
-        us_data_dir = os.path.join(args.data_dir, f'us_10core.txt')
+        us_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/us_10core.txt')
         us_ratings = pd.read_csv(us_data_dir, sep=" ")
 
         us_task_gen = MAMLTaskGenerator(us_ratings, "us", my_id_bank, item_thr=7)
@@ -153,16 +153,16 @@ if __name__ == "__main__":
         print(f"data sampling method: {args.data_sampling_method}")
         for i, market in enumerate(markets, 1):
             print(f"loading {market}")
-            ratings_path = os.path.join(args.data_dir, f'{market}_5core.txt')
+            ratings_path = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{market}_5core.txt')
             ratings = pd.read_csv(ratings_path, sep=" ")
             task_gen_all[i] = MAMLTaskGenerator(ratings, market, my_id_bank, item_thr=7)
             market_index[i] = market
 
     else:
         for mar_index, cur_market in enumerate(markets):
-            cur_mkt_data_dir = os.path.join(args.data_dir, f'{cur_market}_5core.txt')
+            cur_mkt_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{cur_market}_5core.txt')
             if cur_market == 'us':
-                cur_mkt_data_dir = os.path.join(args.data_dir, f'{cur_market}_10core.txt')
+                cur_mkt_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{cur_market}_10core.txt')
             print(f'loading {cur_mkt_data_dir}')
             cur_mkt_ratings = pd.read_csv(cur_mkt_data_dir, sep=' ')
 

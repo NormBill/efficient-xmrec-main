@@ -143,7 +143,7 @@ def train_and_test_model(args, config, model, dataloaders, valid_dataloader, val
 
 def get_data(args):
     id_bank = CentralIDBank()
-    tgt_data_dir = os.path.join(args.data_dir, f'{args.tgt_market}_5core.txt')
+    tgt_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{args.tgt_market}_5core.txt')
     print(f'loading {tgt_data_dir}')
     tgt_ratings = pd.read_csv(tgt_data_dir, sep=' ')
 
@@ -152,9 +152,9 @@ def get_data(args):
 
     aug_method = args.data_augment_method
     if args.aug_src_market == 'us':
-        src_data_dir = os.path.join(args.data_dir, f'{args.aug_src_market}_10core.txt')
+        src_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{args.aug_src_market}_10core.txt')
     else:
-        src_data_dir = os.path.join(args.data_dir, f'{args.aug_src_market}_5core.txt')
+        src_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{args.aug_src_market}_5core.txt')
 
     if aug_method == 'no_aug':
         src_task_generator = None

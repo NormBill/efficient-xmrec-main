@@ -4,13 +4,13 @@ import numpy as np
 
 def prototype_embedding(userid):
     # 1. 读取所有的cluster centers
-    with open("DATA2/proc_data/cluster_centers.txt", "r") as f:
+    with open("/content/efficient-xmrec-main/DATA2/proc_data/cluster_centers.txt", "r") as f:
         cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
     cluster_centers = np.array(cluster_centers)
 
     # 2. 读取与给定userid对应的embedding
     user_embedding = None
-    with open("DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
+    with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
         for line in f:
             parts = line.strip().split()
             if parts[0] == userid:

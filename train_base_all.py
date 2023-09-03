@@ -143,7 +143,7 @@ def get_data(args):
 
     print("loading us data")
     # load the us market data
-    us_data_dir = os.path.join(args.data_dir, f'us_10core.txt')
+    us_data_dir = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/us_10core.txt')
     us_ratings = pd.read_csv(us_data_dir, sep=" ")
 
     us_task_gen = MAMLTaskGenerator(us_ratings, "us", id_bank, item_thr=7)
@@ -162,7 +162,7 @@ def get_data(args):
         if market == "us":
             continue
         print(f"loading {market}")
-        ratings_path = os.path.join(args.data_dir, f'{market}_5core.txt')
+        ratings_path = os.path.join(args.data_dir, f'/content/efficient-xmrec-main/DATA2/proc_data/{market}_5core.txt')
         ratings = pd.read_csv(ratings_path, sep=" ")
         task_gen = MAMLTaskGenerator(ratings, market, id_bank, item_thr=7, items_allow=items_allowed)
         task_gen_all[i] = task_gen
