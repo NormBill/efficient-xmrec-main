@@ -15,7 +15,7 @@ def prototype_embedding(user_indices_tensor):
 
     # 从txt文件加载映射关系
     index_to_user_id_mapping = {}
-    with open("index_to_user_id.txt", "r") as f:
+    with open("/content/index_to_user_id.txt", "r") as f:
         for line in f:
             index, userid = line.strip().split("\t")
             index_to_user_id_mapping[int(index)] = userid

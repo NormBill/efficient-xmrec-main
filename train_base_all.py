@@ -277,7 +277,6 @@ if __name__ == "__main__":
             for index, userid in index_to_user_id_mapping.items():
                 f.write(f"{index}\t{userid}\n")
 
-
     if len(os.path.dirname(args.exp_output)) > 0:
         os.makedirs(os.path.dirname(args.exp_output), exist_ok=True)
 
