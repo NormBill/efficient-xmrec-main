@@ -46,8 +46,8 @@ def prototype_embedding(user_indices_tensor):
         nearest_center = cluster_centers[np.argmin(distances)]
         nearest_centers.append(nearest_center)
 
-    return torch.tensor(nearest_centers).to(user_indices_tensor.device)
-
+    nearest_centers_array = np.array(nearest_centers)
+    return torch.tensor(nearest_centers_array).to(user_indices_tensor.device)
 
 
 import json
@@ -172,6 +172,7 @@ class MLP(torch.nn.Module):
             vector = torch.nn.ReLU()(vector)
             # vector = torch.nn.BatchNorm1d()(vector)
             # vector = torch.nn.Dropout(p=0.5)(vector)
+
         logits = self.affine_output(vector)
         rating = self.logistic(logits)
         return rating
