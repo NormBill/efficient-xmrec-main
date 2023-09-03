@@ -183,7 +183,7 @@ def get_model_cid_dir(args, model_type, flip=False, checkpoint_dir="checkpoints"
 def get_model_config(model_type):
     gmf_config = {'alias': 'gmf',
                   'adam_lr': 0.005,  # 1e-3,
-                  'latent_dim': 8,
+                  'latent_dim': 16,
                   'l2_regularization': 1e-07,  # 0, # 0.01
                   'embedding_user': None,
                   'embedding_item': None,
