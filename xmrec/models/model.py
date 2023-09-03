@@ -64,7 +64,7 @@ def init_market_embedding(model, config):
         model.market_aware = True
         model.num_markets = config["num_markets"]
         if config.get("embedding_market") is None:
-            file_path = 'DATA2/proc_data/market_aware_reprs.json'
+            file_path = '/content/efficient-xmrec-main/DATA2/proc_data/market_aware_reprs.json'
             model.embedding_market = read_json_file(file_path)
             model.trainable_market = True
         else:
