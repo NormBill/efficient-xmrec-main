@@ -2,42 +2,52 @@ from xmrec.utils.forec_utils import *
 from xmrec.data.data import CentralIDBank
 import pickle
 import numpy as np
+import torch
 
-def prototype_embedding(userid):
-    id_bank = CentralIDBank()
-    # user_id = id_bank.query_user_id(userid)
+def prototype_embedding(user_indices_tensor):
+    user_indices_list = user_indices_tensor.tolist()
+    nearest_centers = []
+
     # 1. 读取所有的cluster centers
     with open("/content/efficient-xmrec-main/DATA2/proc_data/cluster_centers.txt", "r") as f:
         cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
     cluster_centers = np.array(cluster_centers)
 
-    with open("/content/index_to_user_id.pkl.pkl", "rb") as f:
-        index_to_user_id_mapping = pickle.load(f)
-
-        # 使用映射找到与给定索引对应的userid
-        if userid in index_to_user_id_mapping:
-            userid = index_to_user_id_mapping[userid]
-        else:
-            raise ValueError(f"No userid found for index {userid}")
-
-    # 2. 读取与给定userid对应的embedding
-    user_embedding = None
-    with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
+    # 从txt文件加载映射关系
+    index_to_user_id_mapping = {}
+    with open("index_to_user_id.txt", "r") as f:
         for line in f:
-            parts = line.strip().split()
-            if parts[0] == userid:
-                user_embedding = np.array(list(map(float, parts[1:])))
-                break
+            index, userid = line.strip().split("\t")
+            index_to_user_id_mapping[int(index)] = userid
 
-    if user_embedding is None:
-        raise ValueError(f"User ID {userid} not found in embeddings_with_userid.txt")
+    for index in user_indices_list:
+        # 使用映射找到与给定索引对应的userid
+        if index in index_to_user_id_mapping:
+            userid = index_to_user_id_mapping[index]
+        else:
+            raise ValueError(f"No userid found for index {index}")
 
-    # 3. 计算给定embedding与每个cluster center的距离
-    distances = np.linalg.norm(cluster_centers - user_embedding, axis=1)
+        # 2. 读取与给定userid对应的embedding
+        user_embedding = None
+        with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
+            for line in f:
+                parts = line.strip().split()
+                if parts[0] == userid:
+                    user_embedding = np.array(list(map(float, parts[1:])))
+                    break
 
-    # 4. 返回距离最近的cluster center
-    nearest_center = cluster_centers[np.argmin(distances)]
-    return nearest_center
+        if user_embedding is None:
+            raise ValueError(f"User ID {userid} not found in embeddings_with_userid.txt")
+
+        # 3. 计算给定embedding与每个cluster center的距离
+        distances = np.linalg.norm(cluster_centers - user_embedding, axis=1)
+
+        # 4. 返回距离最近的cluster center
+        nearest_center = cluster_centers[np.argmin(distances)]
+        nearest_centers.append(nearest_center)
+
+    return torch.tensor(nearest_centers).to(user_indices_tensor.device)
+
 
 
 import json
