@@ -11,7 +11,7 @@ def prototype_embedding(userid):
         cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
     cluster_centers = np.array(cluster_centers)
 
-    with open("item_id_to_index.pkl", "rb") as f:
+    with open("/content/index_to_user_id.pkl.pkl", "rb") as f:
         item_id_to_index_mapping = pickle.load(f)
 
     # 使用映射找到与给定索引对应的userid
