@@ -209,6 +209,14 @@ if __name__ == "__main__":
     else:
         models = [args.model_selection]
 
+    import pickle
+
+    # 获取映射关系
+    index_to_user_id_mapping = {v: k for k, v in id_bank.user_id_index.items()}
+
+    with open("index_to_user_id.pkl", "wb") as f:
+        pickle.dump(index_to_user_id_mapping, f)
+
     results = {}
     for cur_model_selection in models:
         sys.stdout.flush()

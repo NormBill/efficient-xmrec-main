@@ -1,20 +1,31 @@
 from xmrec.utils.forec_utils import *
-from xmrec.data.data import query_user_id
-
+from xmrec.data.data import CentralIDBank
+import pickle
 import numpy as np
 
 def prototype_embedding(userid):
+    id_bank = CentralIDBank()
+    # user_id = id_bank.query_user_id(userid)
     # 1. 读取所有的cluster centers
     with open("/content/efficient-xmrec-main/DATA2/proc_data/cluster_centers.txt", "r") as f:
         cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
     cluster_centers = np.array(cluster_centers)
+
+    with open("item_id_to_index.pkl", "rb") as f:
+        item_id_to_index_mapping = pickle.load(f)
+
+    # 使用映射找到与给定索引对应的userid
+    if userid in index_to_user_id_mapping:
+        userid = index_to_user_id_mapping[index]
+    else:
+        raise ValueError(f"No userid found for index {index}")
 
     # 2. 读取与给定userid对应的embedding
     user_embedding = None
     with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
         for line in f:
             parts = line.strip().split()
-            if parts[0] == query_user_id(userid):
+            if parts[0] == userid:
                 user_embedding = np.array(list(map(float, parts[1:])))
                 break
 
