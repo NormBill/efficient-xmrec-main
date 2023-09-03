@@ -1,4 +1,5 @@
 from xmrec.utils.forec_utils import *
+from xmrec.data.data import query_user_id
 
 import numpy as np
 
@@ -13,7 +14,7 @@ def prototype_embedding(userid):
     with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
         for line in f:
             parts = line.strip().split()
-            if parts[0] == userid:
+            if parts[0] == query_user_id(userid):
                 user_embedding = np.array(list(map(float, parts[1:])))
                 break
 
