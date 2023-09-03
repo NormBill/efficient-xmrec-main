@@ -269,11 +269,14 @@ if __name__ == "__main__":
         ############
         ## SAVE the model and idbank
         ############
-        if config['save_trained']:
-            model_dir, cid_filename = get_model_cid_dir(args, args.model_selection)
-            save_checkpoint(model, model_dir)
-            with open(cid_filename, 'wb') as centralid_file:
-                pickle.dump(id_bank, centralid_file)
+        # 获取映射关系
+        index_to_user_id_mapping = {v: k for k, v in id_bank.user_id_index.items()}
+
+        # 保存到txt文件
+        with open("index_to_user_id.txt", "w") as f:
+            for index, userid in index_to_user_id_mapping.items():
+                f.write(f"{index}\t{userid}\n")
+
 
     if len(os.path.dirname(args.exp_output)) > 0:
         os.makedirs(os.path.dirname(args.exp_output), exist_ok=True)
