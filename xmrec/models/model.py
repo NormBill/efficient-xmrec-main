@@ -2,37 +2,31 @@ from xmrec.utils.forec_utils import *
 
 import numpy as np
 
-def read_embeddings(file_path):
-    embeddings = {}
-    with open(file_path, 'r') as f:
+def prototype_embedding(userid):
+    # 1. 读取所有的cluster centers
+    with open("DATA2/proc_data/cluster_centers.txt", "r") as f:
+        cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
+    cluster_centers = np.array(cluster_centers)
+
+    # 2. 读取与给定userid对应的embedding
+    user_embedding = None
+    with open("DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
         for line in f:
             parts = line.strip().split()
-            user_id = int(parts[0])
-            embedding = np.array([float(x) for x in parts[1:]])
-            embeddings[user_id] = embedding
-    return embeddings
+            if parts[0] == userid:
+                user_embedding = np.array(list(map(float, parts[1:])))
+                break
 
+    if user_embedding is None:
+        raise ValueError(f"User ID {userid} not found in embeddings_with_userid.txt")
 
-def prototype_embedding(userid):
-    # 读取embeddings_with_userid.txt
-    user_embeddings = read_embeddings('DATA2/proc_data/embeddings_with_userid.txt')
+    # 3. 计算给定embedding与每个cluster center的距离
+    distances = np.linalg.norm(cluster_centers - user_embedding, axis=1)
 
-    # 读取cluster_centers.txt
-    cluster_centers = []
-    with open('DATA2/proc_data/cluster_centers.txt', 'r') as f:
-        for line in f:
-            embedding = np.array([float(x) for x in line.strip().split()])
-            cluster_centers.append(embedding)
-
-    # 根据userid获取对应的embedding
-    user_embedding = user_embeddings[userid]
-
-    # 计算与所有cluster centers的距离
-    distances = [np.linalg.norm(user_embedding - center) for center in cluster_centers]
-
-    # 返回距离最近的cluster center
+    # 4. 返回距离最近的cluster center
     nearest_center = cluster_centers[np.argmin(distances)]
     return nearest_center
+
 
 import json
 
@@ -78,7 +72,7 @@ class GMF(torch.nn.Module):
         self.latent_dim = config['latent_dim']
         self.trainable_user = False
         self.trainable_item = False
-        self.market_embedding =
+        init_market_embedding(self, config)
 
         if config['embedding_user'] is None:
             self.embedding_user = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim)
