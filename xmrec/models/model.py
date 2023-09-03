@@ -12,13 +12,13 @@ def prototype_embedding(userid):
     cluster_centers = np.array(cluster_centers)
 
     with open("/content/index_to_user_id.pkl.pkl", "rb") as f:
-        item_id_to_index_mapping = pickle.load(f)
+        index_to_user_id_mapping = pickle.load(f)
 
-    # 使用映射找到与给定索引对应的userid
-    if userid in index_to_user_id_mapping:
-        userid = index_to_user_id_mapping[index]
-    else:
-        raise ValueError(f"No userid found for index {index}")
+        # 使用映射找到与给定索引对应的userid
+        if userid in index_to_user_id_mapping:
+            userid = index_to_user_id_mapping[userid]
+        else:
+            raise ValueError(f"No userid found for index {userid}")
 
     # 2. 读取与给定userid对应的embedding
     user_embedding = None
