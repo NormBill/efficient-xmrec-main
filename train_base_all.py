@@ -214,8 +214,10 @@ if __name__ == "__main__":
     # 获取映射关系
     index_to_user_id_mapping = {v: k for k, v in id_bank.user_id_index.items()}
 
-    with open("index_to_user_id.pkl", "wb") as f:
-        pickle.dump(index_to_user_id_mapping, f)
+    # 保存到txt文件
+    with open("index_to_user_id.txt", "w") as f:
+        for index, userid in index_to_user_id_mapping.items():
+            f.write(f"{index}\t{userid}\n")
 
     results = {}
     for cur_model_selection in models:
@@ -270,12 +272,7 @@ if __name__ == "__main__":
         ## SAVE the model and idbank
         ############
         # 获取映射关系
-        index_to_user_id_mapping = {v: k for k, v in id_bank.user_id_index.items()}
 
-        # 保存到txt文件
-        with open("index_to_user_id.txt", "w") as f:
-            for index, userid in index_to_user_id_mapping.items():
-                f.write(f"{index}\t{userid}\n")
 
     if len(os.path.dirname(args.exp_output)) > 0:
         os.makedirs(os.path.dirname(args.exp_output), exist_ok=True)
