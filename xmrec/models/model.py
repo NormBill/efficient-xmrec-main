@@ -127,6 +127,9 @@ class GMF(torch.nn.Module):
             item_embedding = self.embedding_item[item_indices]
         item_embedding = transform_market_aware(self, item_embedding, market_indices)
         element_product = torch.mul(user_embedding, item_embedding)
+        element_product = element_product.to(torch.float32)
+        print(self.affine_output.weight.dtype)
+        print(element_product.dtype)
         logits = self.affine_output(element_product)
         rating = self.logistic(logits)
         return rating
