@@ -261,16 +261,16 @@ if __name__ == "__main__":
 
         if args.model_selection == 'gmf':
             print('model is GMF!')
-            model = GMF(config)
+            model = GMF(config, cluster_centers, index_to_user_id_mapping, user_embedding)
         elif args.model_selection == 'nmf':
             print('model is NeuMF!')
-            model = NeuMF(config)
+            model = NeuMF(config, cluster_centers, index_to_user_id_mapping, user_embedding)
             if config['load_pretrained']:
                 print('loading pretrained gmf and mlp...')
                 model.load_pretrain_weights(args)
         else:  # default is MLP
             print('model is MLP!')
-            model = MLP(config)
+            model = MLP(config, cluster_centers, index_to_user_id_mapping, user_embedding)
             if config['load_pretrained']:
                 print('loading pretrained gmf...')
                 model.load_pretrain_weights(args)
