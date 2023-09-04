@@ -39,20 +39,12 @@ def prototype_embedding(user_indices_tensor, cluster_centers, index_to_user_id_m
         if user_embedding is None:
             raise ValueError(f"User ID {userid} not found in embeddings_with_userid.txt")
 
-        start_time = time.time()  # 记录开始时间
         # 3. 计算给定embedding与每个cluster center的距离
         distances = np.linalg.norm(cluster_centers - user_embedding, axis=1)
-        end_time = time.time()  # 记录结束时间
-        elapsed_time = end_time - start_time  # 计算消耗的时间
-        print(f"3. 计算给定embedding与每个cluster center的距离 executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
 
-        start_time = time.time()  # 记录开始时间
         # 4. 返回距离最近的cluster center
         nearest_center = cluster_centers[np.argmin(distances)]
         nearest_centers.append(nearest_center)
-        end_time = time.time()  # 记录结束时间
-        elapsed_time = end_time - start_time  # 计算消耗的时间
-        print(f"4. 返回距离最近的cluster center executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
 
     nearest_centers_array = np.array(nearest_centers)
     return torch.tensor(nearest_centers_array).to(user_indices_tensor.device)
