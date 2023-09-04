@@ -130,7 +130,7 @@ def use_optimizer(network, params):
     return optimizer
 
 
-def get_model_cid_dir(args, model_type, flip=False, checkpoint_dir="checkpoints"):
+def get_model_cid_dir(args, model_type, flip=False, checkpoint_dir="/content/checkpoints"):
     """
     based on args and model type, this function generates idbank and checkpoint file dirs
     """
