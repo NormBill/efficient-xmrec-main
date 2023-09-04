@@ -233,6 +233,9 @@ if __name__ == "__main__":
         config['num_items'] = int(id_bank.last_item_index + 1)
         config['num_markets'] = len(markets)
         config['mkt_idx'] = {m: i for (i, m) in enumerate(sorted(markets))}
+        with open('market_to_index.txt', 'w') as f:
+            for market, index in config['mkt_idx'].items():
+                f.write(f"{market}\t{index}\n")
 
         if args.model_selection == 'gmf':
             print('model is GMF!')

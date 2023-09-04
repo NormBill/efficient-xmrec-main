@@ -74,11 +74,30 @@ def init_market_embedding(model, config):
 
 
 def transform_market_aware(model, item_embedding, market_indices):
+    # Step 1: Read the index_to_market mapping from the txt file
+    index_to_market = {}
+    with open('/content/market_to_index.txt', 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            market, index = line.strip().split('\t')
+            index_to_market[int(index)] = market
+
+    # Convert market_indices tensor to a list
+    market_indices_list = market_indices.tolist()
+
+    # Step 2: Transform indices to market names using the index_to_market dictionary
+    market_names_list = [index_to_market[idx] for idx in market_indices_list]
+
     if model.market_aware:
         if model.trainable_market:
-            market_embedding = model.embedding_market(market_indices)
+            # Get the market embeddings for each market name
+            market_embedding_list = [model.embedding_market[market_name] for market_name in market_names_list]
+            # Convert the list of embeddings to a tensor
+            market_embedding = torch.tensor(market_embedding_list).to(item_embedding.device)
         else:
-            market_embedding = model.embedding_market[market_indices]
+            # Similar logic for the non-trainable case
+            market_embedding_list = [model.embedding_market[market_name] for market_name in market_names_list]
+            market_embedding = torch.tensor(market_embedding_list).to(item_embedding.device)
 
         item_embedding = torch.mul(item_embedding, market_embedding)
 
