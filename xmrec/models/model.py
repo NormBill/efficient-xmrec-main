@@ -145,12 +145,8 @@ class GMF(torch.nn.Module):
             user_embedding = self.embedding_user[user_indices]
 
         # 获取prototype embedding并与user embedding进行元素级的乘法
-        start_time = time.time()  # 记录开始时间
         prototype_emb = prototype_embedding(user_indices, self.cluster_centers, self.index_to_user_id_mapping,
                                             self.user_embedding)
-        end_time = time.time()  # 记录结束时间
-        elapsed_time = end_time - start_time  # 计算消耗的时间
-        print(f"prototype_embedding executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
 
         user_embedding = torch.mul(user_embedding, prototype_emb)
 
@@ -161,8 +157,7 @@ class GMF(torch.nn.Module):
         item_embedding = transform_market_aware(self, item_embedding, market_indices)
         element_product = torch.mul(user_embedding, item_embedding)
         element_product = element_product.to(torch.float32)
-        print(self.affine_output.weight.dtype)
-        print(element_product.dtype)
+
         logits = self.affine_output(element_product)
         rating = self.logistic(logits)
         return rating
