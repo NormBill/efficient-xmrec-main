@@ -3,22 +3,22 @@ from xmrec.data.data import CentralIDBank
 import pickle
 import numpy as np
 import torch
+import time
 
-def prototype_embedding(user_indices_tensor):
+def prototype_embedding(user_indices_tensor, cluster_centers, index_to_user_id_mapping, user_embedding):
     user_indices_list = user_indices_tensor.tolist()
     nearest_centers = []
+    # # 1. 读取所有的cluster centers
+    # with open("/content/efficient-xmrec-main/DATA2/proc_data/cluster_centers.txt", "r") as f:
+    #     cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
+    # cluster_centers = np.array(cluster_centers)
 
-    # 1. 读取所有的cluster centers
-    with open("/content/efficient-xmrec-main/DATA2/proc_data/cluster_centers.txt", "r") as f:
-        cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
-    cluster_centers = np.array(cluster_centers)
-
-    # 从txt文件加载映射关系
-    index_to_user_id_mapping = {}
-    with open("/content/index_to_user_id.txt", "r") as f:
-        for line in f:
-            index, userid = line.strip().split("\t")
-            index_to_user_id_mapping[int(index)] = userid
+    # # 从txt文件加载映射关系
+    # index_to_user_id_mapping = {}
+    # with open("/content/index_to_user_id.txt", "r") as f:
+    #     for line in f:
+    #         index, userid = line.strip().split("\t")
+    #         index_to_user_id_mapping[int(index)] = userid
 
     for index in user_indices_list:
         # 使用映射找到与给定索引对应的userid
@@ -27,30 +27,39 @@ def prototype_embedding(user_indices_tensor):
         else:
             raise ValueError(f"No userid found for index {index}")
 
-        # 2. 读取与给定userid对应的embedding
-        user_embedding = None
-        with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
-            for line in f:
-                parts = line.strip().split()
-                if parts[0] == userid:
-                    user_embedding = np.array(list(map(float, parts[1:])))
-                    break
+        # # 2. 读取与给定userid对应的embedding
+        # user_embedding = None
+        # with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
+        #     for line in f:
+        #         parts = line.strip().split()
+        #         if parts[0] == userid:
+        #             user_embedding = np.array(list(map(float, parts[1:])))
+        #             break
 
         if user_embedding is None:
             raise ValueError(f"User ID {userid} not found in embeddings_with_userid.txt")
 
+        start_time = time.time()  # 记录开始时间
         # 3. 计算给定embedding与每个cluster center的距离
         distances = np.linalg.norm(cluster_centers - user_embedding, axis=1)
+        end_time = time.time()  # 记录结束时间
+        elapsed_time = end_time - start_time  # 计算消耗的时间
+        print(f"3. 计算给定embedding与每个cluster center的距离 executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
 
+        start_time = time.time()  # 记录开始时间
         # 4. 返回距离最近的cluster center
         nearest_center = cluster_centers[np.argmin(distances)]
         nearest_centers.append(nearest_center)
+        end_time = time.time()  # 记录结束时间
+        elapsed_time = end_time - start_time  # 计算消耗的时间
+        print(f"4. 返回距离最近的cluster center executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
 
     nearest_centers_array = np.array(nearest_centers)
     return torch.tensor(nearest_centers_array).to(user_indices_tensor.device)
 
 
 import json
+
 
 def read_json_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -105,14 +114,21 @@ def transform_market_aware(model, item_embedding, market_indices):
 
 
 class GMF(torch.nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, cluster_centers, index_to_user_id_mapping, user_embedding):
         super(GMF, self).__init__()
-
+        self.cluster_centers = cluster_centers
+        self.index_to_user_id_mapping = index_to_user_id_mapping
+        self.user_embedding = user_embedding
         self.num_users = config['num_users']
         self.num_items = config['num_items']
         self.latent_dim = config['latent_dim']
         self.trainable_user = False
         self.trainable_item = False
+        start_time = time.time()  # 记录开始时间
+        init_market_embedding(self, config)
+        end_time = time.time()  # 记录结束时间
+        elapsed_time = end_time - start_time  # 计算消耗的时间
+        print(f"init_market_embedding executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
         init_market_embedding(self, config)
 
         if config['embedding_user'] is None:
@@ -137,7 +153,13 @@ class GMF(torch.nn.Module):
             user_embedding = self.embedding_user[user_indices]
 
         # 获取prototype embedding并与user embedding进行元素级的乘法
-        prototype_emb = prototype_embedding(user_indices)
+        start_time = time.time()  # 记录开始时间
+        prototype_emb = prototype_embedding(user_indices, self.cluster_centers, self.index_to_user_id_mapping,
+                                            self.user_embedding)
+        end_time = time.time()  # 记录结束时间
+        elapsed_time = end_time - start_time  # 计算消耗的时间
+        print(f"prototype_embedding executed in {elapsed_time:.2f} seconds")  # 打印消耗的时间
+
         user_embedding = torch.mul(user_embedding, prototype_emb)
 
         if self.trainable_item:
@@ -158,9 +180,12 @@ class GMF(torch.nn.Module):
 
 
 class MLP(torch.nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, cluster_centers, index_to_user_id_mapping, user_embedding):
         super(MLP, self).__init__()
         self.config = config
+        self.cluster_centers = cluster_centers
+        self.index_to_user_id_mapping = index_to_user_id_mapping
+        self.user_embedding = user_embedding
         self.num_users = config['num_users']
         self.num_items = config['num_items']
         self.latent_dim = config['latent_dim']
@@ -181,7 +206,8 @@ class MLP(torch.nn.Module):
         user_embedding = self.embedding_user(user_indices)
         item_embedding = self.embedding_item(item_indices)
 
-        prototype_emb = prototype_embedding(user_indices)
+        prototype_emb = prototype_embedding(user_indices, self.cluster_centers, self.index_to_user_id_mapping,
+                                            self.user_embedding)
         user_embedding = torch.mul(user_embedding, prototype_emb)
         item_embedding = transform_market_aware(self, item_embedding, market_indices)
 
@@ -217,9 +243,12 @@ class MLP(torch.nn.Module):
 
 
 class NeuMF(torch.nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, cluster_centers, index_to_user_id_mapping, user_embedding):
         super(NeuMF, self).__init__()
         self.config = config
+        self.cluster_centers = cluster_centers
+        self.index_to_user_id_mapping = index_to_user_id_mapping
+        self.user_embedding = user_embedding
         self.num_users = config['num_users']
         self.num_items = config['num_items']
         self.latent_dim_mf = config['latent_dim_mf']
@@ -247,7 +276,8 @@ class NeuMF(torch.nn.Module):
         user_embedding_mlp = self.embedding_user_mlp(user_indices)
         item_embedding_mlp = self.embedding_item_mlp(item_indices)
         # 获取prototype embedding并与user embedding进行元素级的乘法
-        prototype_emb = prototype_embedding(user_indices)
+        prototype_emb = prototype_embedding(user_indices, self.cluster_centers, self.index_to_user_id_mapping,
+                                            self.user_embedding)
         user_embedding = torch.mul(user_embedding, prototype_emb)
         item_embedding_mlp = transform_market_aware(self,
                                                                         item_embedding_mlp,

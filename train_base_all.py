@@ -237,6 +237,27 @@ if __name__ == "__main__":
             for market, index in config['mkt_idx'].items():
                 f.write(f"{market}\t{index}\n")
 
+        # 1. 读取所有的cluster centers
+        with open("/content/efficient-xmrec-main/DATA2/proc_data/cluster_centers.txt", "r") as f:
+            cluster_centers = [list(map(float, line.strip().split())) for line in f.readlines()]
+        cluster_centers = np.array(cluster_centers)
+
+        # 从txt文件加载映射关系
+        index_to_user_id_mapping = {}
+        with open("/content/index_to_user_id.txt", "r") as f:
+            for line in f:
+                index, userid = line.strip().split("\t")
+                index_to_user_id_mapping[int(index)] = userid
+
+        # 2. 读取与给定userid对应的embedding
+        user_embedding = None
+        with open("/content/efficient-xmrec-main/DATA2/proc_data/embeddings_with_userid.txt", "r") as f:
+            for line in f:
+                parts = line.strip().split()
+                if parts[0] == userid:
+                    user_embedding = np.array(list(map(float, parts[1:])))
+                    break
+
         if args.model_selection == 'gmf':
             print('model is GMF!')
             model = GMF(config)
